@@ -16,7 +16,7 @@ if [[ -f /usr/bin/apt-get ]] || [[ -f /usr/bin/yum && -f /bin/systemctl ]]; then
 else
 	echo -e " 哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}" && exit 1
 fi
-do_service() {
+service_Cmd() {
 	if [[ $systemd ]]; then
 		systemctl $1 $2
 	else
@@ -57,6 +57,12 @@ config_v2ray_ws() {
 	read -p "数据库用户:" db_User
 	read -p "数据库密码:" db_Password
 	install_caddy
+	install_v2ray
+	service_Cmd restart caddy
+	service_Cmd restart v2ray
+	firewall_set
+	service_Cmd status caddy
+	service_Cmd status v2ray
 }
 
 install_v2ray(){
@@ -73,10 +79,6 @@ install_v2ray(){
 		sed -i -e "s/db_User/$db_User/g" config.json
 		sed -i -e "s/db_Password/$db_Password/g" config.json
 		mv -f config.json /etc/v2ray/
-		do_service restart v2ray
-		# 查看下运行状态
-		do_service status caddy
-		do_service status v2ray
 	fi
 }
 
@@ -139,9 +141,60 @@ install_caddy() {
 		sed -i -e "s/v2ray_Port/$v2ray_Port/g" Caddyfile
 		sed -i -e "s/user_Name/$user_Name/g" Caddyfile
 		mv -f Caddyfile /etc/caddy/
-		do_service restart caddy
-		install_v2ray
 	fi
+}
+
+# Firewall
+firewall_set(){
+    echo -e "[${green}Info${plain}] firewall set start..."
+    if command -v firewall-cmd >/dev/null 2>&1; then
+        systemctl status firewalld > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            firewall-cmd --permanent --zone=public --remove-port=443/tcp
+            firewall-cmd --permanent --zone=public --remove-port=80/tcp
+            firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/tcp
+            firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/udp
+			firewall-cmd --permanent --zone=public --add-port=443/tcp
+            firewall-cmd --permanent --zone=public --add-port=80/tcp
+            firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/tcp
+            firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/udp
+            firewall-cmd --reload
+        else
+            echo -e "[${yellow}Warning${plain}] firewalld looks like not running or not installed, please enable port 80, 443, ${v2ray_Port} manually if necessary."
+        fi
+    elif command -v iptables >/dev/null 2>&1; then
+        /etc/init.d/iptables status > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            iptables -L -n | grep -i ${v2ray_Port} > /dev/null 2>&1
+            if [ $? -ne 0 ]; then
+				iptables -D INPUT -p tcp --match multiport --dports 443 -j ACCEPT
+				iptables -D INPUT -p tcp --match multiport --dports 80 -j ACCEPT
+				iptables -D INPUT -p tcp --match multiport --dports ${v2ray_Port} -j ACCEPT
+				iptables -D INPUT -p udp --match multiport --dports ${v2ray_Port} -j ACCEPT
+                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${v2ray_Port} -j ACCEPT
+                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${v2ray_Port} -j ACCEPT
+                /etc/init.d/iptables save
+                /etc/init.d/iptables restart
+				ip6tables -D INPUT -p tcp --match multiport --dports 443 -j ACCEPT
+				ip6tables -D INPUT -p tcp --match multiport --dports 80 -j ACCEPT
+				ip6tables -D INPUT -p tcp --match multiport --dports ${v2ray_Port} -j ACCEPT
+				ip6tables -D INPUT -p udp --match multiport --dports ${v2ray_Port} -j ACCEPT
+                ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+                ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+                ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${v2ray_Port} -j ACCEPT
+                ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport ${v2ray_Port} -j ACCEPT
+                /etc/init.d/ip6tables save
+                /etc/init.d/ip6tables restart
+            else
+                echo -e "[${green}Info${plain}] port 80, 443, ${v2ray_Port} has been set up."
+            fi
+        else
+            echo -e "[${yellow}Warning${plain}] iptables looks like shutdown or not installed, please manually set it if necessary."
+        fi
+    fi
+    echo -e "[${green}Info${plain}] firewall set completed... port 80, 443, ${v2ray_Port} are enable"
 }
 
 install_ssr(){

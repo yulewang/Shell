@@ -7,7 +7,7 @@ install_ssr(){
 	
 	clear
 	cd /usr/
-  	wget https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz
+  	wget https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz -O libsodium-1.0.16.tar.gz
   	tar xf libsodium-1.0.16.tar.gz && cd libsodium-1.0.16
   	./configure && make -j2 && make install
   	echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
@@ -15,7 +15,8 @@ install_ssr(){
   	rm -rf libsodium-1.0.16.tar.gz
 	echo 'libsodium安装完成'
 	
-  	git clone -b master https://github.com/828768/shadowsocksr.git && cd shadowsocksr && sh setup_cymysql.sh && sh initcfg.sh
+  	rm -rf shadowsocksr
+	git clone -b master https://github.com/828768/shadowsocksr.git && cd shadowsocksr && sh setup_cymysql.sh && sh initcfg.sh
 	echo 'ssr安装完成'
 
 	sed -i -e "s/ssserver/db\.wubase\.com/g" usermysql.json

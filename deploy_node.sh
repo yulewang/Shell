@@ -50,7 +50,7 @@ config_v2ray_ws() {
 	read -p "转发路径『不要带/』:" forward_Path
 	read -p "V2Ray端口:" v2ray_Port
 	read -p "V2Ray额外ID:" alter_Id
-	read -p "用户同步端口:" dbsync_Port
+	read -p "面板同步端口:" dbsync_Port
 	read -p "节点ID:" node_Id
 	read -p "数据库地址:" db_Host
 	read -p "数据库名称:" db_Name

@@ -167,24 +167,24 @@ firewall_set(){
         if [ $? -eq 0 ]; then
             iptables -L -n | grep -i ${v2ray_Port} > /dev/null 2>&1
             if [ $? -ne 0 ]; then
-				iptables -D INPUT -p tcp --match multiport --dports 443 -j ACCEPT
-				iptables -D INPUT -p tcp --match multiport --dports 80 -j ACCEPT
-				iptables -D INPUT -p tcp --match multiport --dports ${v2ray_Port} -j ACCEPT
-				iptables -D INPUT -p udp --match multiport --dports ${v2ray_Port} -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${v2ray_Port} -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${v2ray_Port} -j ACCEPT
+				iptables -D INPUT -p tcp --dport 443 -j ACCEPT
+				iptables -D INPUT -p tcp --dport 80 -j ACCEPT
+				iptables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				iptables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
+                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+                iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+                iptables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+                iptables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
                 /etc/init.d/iptables save
                 /etc/init.d/iptables restart
-				ip6tables -D INPUT -p tcp --match multiport --dports 443 -j ACCEPT
-				ip6tables -D INPUT -p tcp --match multiport --dports 80 -j ACCEPT
-				ip6tables -D INPUT -p tcp --match multiport --dports ${v2ray_Port} -j ACCEPT
-				ip6tables -D INPUT -p udp --match multiport --dports ${v2ray_Port} -j ACCEPT
-                ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
-                ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
-                ip6tables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${v2ray_Port} -j ACCEPT
-                ip6tables -I INPUT -m state --state NEW -m udp -p udp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -D INPUT -p tcp --dport 443 -j ACCEPT
+				ip6tables -D INPUT -p tcp --dport 80 -j ACCEPT
+				ip6tables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
+                ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
+                ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
+                ip6tables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+                ip6tables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
                 /etc/init.d/ip6tables save
                 /etc/init.d/ip6tables restart
             else

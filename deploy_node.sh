@@ -12,7 +12,15 @@ if [[ -f /usr/bin/apt-get ]] || [[ -f /usr/bin/yum && -f /bin/systemctl ]]; then
 	if [[ -f /bin/systemctl ]]; then
 		systemd=true
 	fi
-	$cmd -y install git unzip
+	$cmd -y install git unzip epel-release vim lrzsz screen ntp crontabs net-tools telnet
+	# 设置时区为CST
+	echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+	ntpdate cn.pool.ntp.org
+	sed -i '/^.*ntpdate*/d' /etc/crontab
+	sed -i '$a\* * * * 1 ntpdate cn.pool.ntp.org >> /dev/null 2>&1' /etc/crontab
+	service crond restart
+	hwclock -w
+
 else
 	echo -e " 哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}" && exit 1
 fi
@@ -58,15 +66,17 @@ config_v2ray_ws() {
 	read -p "数据库密码:" db_Password
 	install_caddy
 	install_v2ray
-	service_Cmd restart caddy
-	service_Cmd restart v2ray
+	service_Cmd restart caddy v2ray
 	firewall_set
-	service_Cmd status caddy
-	service_Cmd status v2ray
+	service_Cmd status caddy v2ray
 }
 
 install_v2ray(){
 	curl -L -s https://raw.githubusercontent.com/ColetteContreras/v2ray-ssrpanel-plugin/master/install-release.sh | bash
+	if [[ $num == "2" ]]; then
+		echo -e "没帮做自动配置，手动去改 /etc/v2ray/config.json"
+		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#V2Ray"
+	fi
 	if [[ $num == "1" ]]; then
 		wget --no-check-certificate -O config.json https://raw.githubusercontent.com/828768/Shell/master/resource/v2ray-config.json
 		sed -i -e "s/v2ray_Port/$v2ray_Port/g" config.json
@@ -128,6 +138,11 @@ install_caddy() {
 	chown -R www-data.www-data /etc/ssl/caddy
 	rm -rf $caddy_tmp
 	echo -e "Caddy安装完成！"
+
+	if [[ $num == "3" ]]; then
+		echo -e "没帮你做自动配置，手动去改 /etc/caddy/Caddyfile"
+		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#caddy"
+	fi
 
 	# 修改配置
 	mkdir -p /etc/caddy/

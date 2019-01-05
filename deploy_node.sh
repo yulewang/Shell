@@ -74,6 +74,7 @@ config_v2ray_ws() {
 install_v2ray(){
 	curl -L -s https://raw.githubusercontent.com/ColetteContreras/v2ray-ssrpanel-plugin/master/install-release.sh | bash
 	if [[ $num == "2" ]]; then
+		service_Cmd status v2ray
 		echo -e "没帮做自动配置，手动去改 /etc/v2ray/config.json"
 		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#V2Ray"
 	fi
@@ -140,6 +141,7 @@ install_caddy() {
 	echo -e "Caddy安装完成！"
 
 	if [[ $num == "3" ]]; then
+		service_Cmd status caddy
 		echo -e "没帮你做自动配置，手动去改 /etc/caddy/Caddyfile"
 		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#caddy"
 	fi

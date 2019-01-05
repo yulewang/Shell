@@ -73,6 +73,7 @@ config_v2ray_ws() {
 
 install_v2ray(){
 	curl -L -s https://raw.githubusercontent.com/ColetteContreras/v2ray-ssrpanel-plugin/master/install-release.sh | bash
+	echo -e "默认日志输出级别为debug，搞定后建议修改为error"
 	if [[ $num == "2" ]]; then
 		service_Cmd status v2ray
 		echo -e "没帮做自动配置，手动去改 /etc/v2ray/config.json"

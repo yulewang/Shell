@@ -98,6 +98,14 @@ install_v2ray(){
 }
 
 install_caddy() {
+	if [[ $cmd == "yum" ]]; then
+		[[ $(pgrep "httpd") ]] && systemctl stop httpd
+		[[ $(command -v httpd) ]] && yum remove httpd -y
+	else
+		[[ $(pgrep "apache2") ]] && service apache2 stop
+		[[ $(command -v apache2) ]] && apt remove apache2* -y
+	fi
+
 	local caddy_tmp="/tmp/install_caddy/"
 	local caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
 	if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then

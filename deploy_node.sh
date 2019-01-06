@@ -5,14 +5,15 @@
 
 [ $(id -u) != "0" ] && { echo "错误: 请用root执行"; exit 1; }
 sys_bit=$(uname -m)
-if [[ -f /usr/bin/apt-get ]] || [[ -f /usr/bin/yum && -f /bin/systemctl ]]; then
+if [[ -f /usr/bin/apt ]] || [[ -f /usr/bin/yum && -f /bin/systemctl ]]; then
 	if [[ -f /usr/bin/yum ]]; then
 		cmd="yum"
+		$cmd -y install epel-release
 	fi
 	if [[ -f /bin/systemctl ]]; then
 		systemd=true
 	fi
-	$cmd -y install git unzip epel-release vim lrzsz screen ntp crontabs net-tools telnet
+	$cmd -y install git unzip  vim lrzsz screen ntp ntpdate crontabs net-tools telnet curl
 	# 设置时区为CST
 	echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 	ntpdate cn.pool.ntp.org
@@ -66,19 +67,14 @@ config_v2ray_ws() {
 	read -p "数据库密码:" db_Password
 	install_caddy
 	install_v2ray
-	service_Cmd restart caddy v2ray
 	firewall_set
-	service_Cmd status caddy v2ray
+	service_Cmd status caddy
+	service_Cmd status v2ray
 }
 
 install_v2ray(){
 	curl -L -s https://raw.githubusercontent.com/ColetteContreras/v2ray-ssrpanel-plugin/master/install-release.sh | bash
 	echo -e "默认日志输出级别为debug，搞定后建议修改为error"
-	if [[ $num == "2" ]]; then
-		service_Cmd status v2ray
-		echo -e "没帮做自动配置，手动去改 /etc/v2ray/config.json"
-		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#V2Ray"
-	fi
 	if [[ $num == "1" ]]; then
 		wget --no-check-certificate -O config.json https://raw.githubusercontent.com/828768/Shell/master/resource/v2ray-config.json
 		sed -i -e "s/v2ray_Port/$v2ray_Port/g" config.json
@@ -91,6 +87,13 @@ install_v2ray(){
 		sed -i -e "s/db_User/$db_User/g" config.json
 		sed -i -e "s/db_Password/$db_Password/g" config.json
 		mv -f config.json /etc/v2ray/
+	fi
+	service_Cmd restart v2ray
+
+	if [[ $num == "2" ]]; then
+		service_Cmd status v2ray
+		echo -e "没帮做自动配置，手动去改 /etc/v2ray/config.json"
+		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#V2Ray"
 	fi
 }
 
@@ -141,17 +144,11 @@ install_caddy() {
 	rm -rf $caddy_tmp
 	echo -e "Caddy安装完成！"
 
-	if [[ $num == "3" ]]; then
-		service_Cmd status caddy
-		echo -e "没帮你做自动配置，手动去改 /etc/caddy/Caddyfile"
-		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#caddy"
-	fi
-
 	# 修改配置
 	mkdir -p /etc/caddy/
 	if [[ $num == "1" ]]; then
 		wget --no-check-certificate -O www.zip https://raw.githubusercontent.com/828768/Shell/master/resource/www.zip
-		unzip www.zip -d /srv/ && rm -f www.zip
+		rm -rf /srv/www && unzip www.zip -d /srv/ && rm -f www.zip
 		wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/828768/Shell/master/resource/Caddyfile
 		local user_Name=$(((RANDOM << 22)))
 		sed -i -e "s/fake_Domain/$fake_Domain/g" Caddyfile
@@ -159,6 +156,13 @@ install_caddy() {
 		sed -i -e "s/v2ray_Port/$v2ray_Port/g" Caddyfile
 		sed -i -e "s/user_Name/$user_Name/g" Caddyfile
 		mv -f Caddyfile /etc/caddy/
+	fi
+	service_Cmd restart caddy
+
+	if [[ $num == "3" ]]; then
+		service_Cmd status caddy
+		echo -e "没帮你做自动配置，手动去改 /etc/caddy/Caddyfile"
+		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#caddy"
 	fi
 }
 

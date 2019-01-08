@@ -55,7 +55,7 @@ get_ip() {
 }
 
 config_v2ray_ws() {
-    read -p "绑定的域名，如 sobaigu.com :" fake_Domain
+	read -p "绑定的域名，如 sobaigu.com :" fake_Domain
 	read -p "转发路径『不要带/』，如 game :" forward_Path
 	read -p "V2Ray端口，如 10086 :" v2ray_Port
 	read -p "V2Ray额外ID，如 16 :" alter_Id
@@ -176,65 +176,65 @@ install_caddy() {
 
 # Firewall
 firewall_set(){
-    echo -e "[${green}Info${plain}] firewall set start..."
-    if command -v firewall-cmd >/dev/null 2>&1; then
-        systemctl status firewalld > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            firewall-cmd --permanent --zone=public --remove-port=443/tcp
-            firewall-cmd --permanent --zone=public --remove-port=80/tcp
-            firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/tcp
-            firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/udp
+	echo -e "[${green}Info${plain}] firewall set start..."
+	if command -v firewall-cmd >/dev/null 2>&1; then
+		systemctl status firewalld > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			firewall-cmd --permanent --zone=public --remove-port=443/tcp
+			firewall-cmd --permanent --zone=public --remove-port=80/tcp
+			firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/tcp
+			firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/udp
 			firewall-cmd --permanent --zone=public --add-port=443/tcp
-            firewall-cmd --permanent --zone=public --add-port=80/tcp
-            firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/tcp
-            firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/udp
-            firewall-cmd --reload
-        else
-            echo -e "[${yellow}Warning${plain}] firewalld looks like not running or not installed, please enable port 80, 443, ${v2ray_Port} manually if necessary."
-        fi
-    elif command -v iptables >/dev/null 2>&1; then
-        /etc/init.d/iptables status > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            iptables -L -n | grep -i ${v2ray_Port} > /dev/null 2>&1
-            if [ $? -ne 0 ]; then
+			firewall-cmd --permanent --zone=public --add-port=80/tcp
+			firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/tcp
+			firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/udp
+			firewall-cmd --reload
+		else
+			echo -e "[${yellow}Warning${plain}] firewalld looks like not running or not installed, please enable port 80, 443, ${v2ray_Port} manually if necessary."
+		fi
+	elif command -v iptables >/dev/null 2>&1; then
+		/etc/init.d/iptables status > /dev/null 2>&1
+		if [ $? -eq 0 ]; then
+			iptables -L -n | grep -i ${v2ray_Port} > /dev/null 2>&1
+			if [ $? -ne 0 ]; then
 				iptables -D INPUT -p tcp --dport 443 -j ACCEPT
 				iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 				iptables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
 				iptables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
-                iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-                iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-                iptables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
-                iptables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
-                /etc/init.d/iptables save
-                /etc/init.d/iptables restart
+				iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+				iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+				iptables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				iptables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
+				/etc/init.d/iptables save
+				/etc/init.d/iptables restart
 				ip6tables -D INPUT -p tcp --dport 443 -j ACCEPT
 				ip6tables -D INPUT -p tcp --dport 80 -j ACCEPT
 				ip6tables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
 				ip6tables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
-                ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
-                ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
-                ip6tables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
-                ip6tables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
-                /etc/init.d/ip6tables save
-                /etc/init.d/ip6tables restart
-            else
-                echo -e "[${green}Info${plain}] port 80, 443, ${v2ray_Port} has been set up."
-            fi
-        else
-            echo -e "[${yellow}Warning${plain}] iptables looks like shutdown or not installed, please manually set it if necessary."
-        fi
-    fi
-    echo -e "[${green}Info${plain}] firewall set completed... port 80, 443, ${v2ray_Port} are enable"
+				ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
+				ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
+				ip6tables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
+				/etc/init.d/ip6tables save
+				/etc/init.d/ip6tables restart
+			else
+				echo -e "[${green}Info${plain}] port 80, 443, ${v2ray_Port} has been set up."
+			fi
+		else
+			echo -e "[${yellow}Warning${plain}] iptables looks like shutdown or not installed, please manually set it if necessary."
+		fi
+	fi
+	echo -e "[${green}Info${plain}] firewall set completed... port 80, 443, ${v2ray_Port} are enable"
 }
 
 install_ssr(){
 	clear
 	cd /usr/
-  	wget https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz
-  	tar xf libsodium-1.0.16.tar.gz && cd libsodium-1.0.16
-  	./configure && make -j2 && make install
-  	echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
-  	rm -rf libsodium-1.0.16.tar.gz
+	wget https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz
+	tar xf libsodium-1.0.16.tar.gz && cd libsodium-1.0.16
+	./configure && make -j2 && make install
+	echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
+	rm -rf libsodium-1.0.16.tar.gz
 	echo 'libsodium安装完成'
 	
 	cd /usr/

@@ -59,7 +59,7 @@ config_v2ray_ws() {
 	read -p "转发路径『不要带/』，如 game :" forward_Path
 	read -p "V2Ray端口，如 10086 :" v2ray_Port
 	read -p "V2Ray额外ID，如 16 :" alter_Id
-	read -p "配置同步端口，如 10087 :" dbsync_Port
+	read -p "配置同步端口，如 10087 :" usersync_Port
 	read -p "面板分配的节点ID，如 6 :" node_Id
 	read -p "数据库地址，如 1.1.1.1 :" db_Host
 	read -p "数据库名称，如 ssrpanel :" db_Name
@@ -80,7 +80,7 @@ install_v2ray(){
 		sed -i -e "s/v2ray_Port/$v2ray_Port/g" config.json
 		sed -i -e "s/alter_Id/$alter_Id/g" config.json
 		sed -i -e "s/forward_Path/$forward_Path/g" config.json
-		sed -i -e "s/dbsync_Port/$dbsync_Port/g" config.json
+		sed -i -e "s/usersync_Port/$usersync_Port/g" config.json
 		sed -i -e "s/node_Id/$node_Id/g" config.json
 		sed -i -e "s/db_Host/$db_Host/g" config.json
 		sed -i -e "s/db_Name/$db_Name/g" config.json

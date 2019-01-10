@@ -286,6 +286,7 @@ firewall_set(){
 }
 
 install_ssr(){
+	pip install pymysql peewee pickle 
 	clear
 	cd /usr/
 	rm -rf /usr/libsodium-1.0.16

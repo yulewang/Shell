@@ -288,6 +288,7 @@ firewall_set(){
 install_ssr(){
 	clear
 	cd /usr/
+	rm -rf /usr/libsodium-1.0.16
 	wget https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz
 	tar xf libsodium-1.0.16.tar.gz && cd libsodium-1.0.16
 	./configure && make -j2 && make install

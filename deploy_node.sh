@@ -307,6 +307,8 @@ install_ssr(){
 		[ -z "$db_Name" ] && db_Name="ssrpanel"
 	read -p "$(echo -e "$yellow数据库用户名$none(默认：${cyan}ssrpanel$none)")：" db_User
 		[ -z "$db_User" ] && db_User="ssrpanel"
+	read -p "$(echo -e "$yellow数据库密码$none(默认：${cyan}ssrpanel$none)")：" db_Password
+		[ -z "$db_Password" ] && db_Password="ssrpanel"
 	read -p "本节点ID:" node_Id
 	read -p "流量计算比例:" transfer_Ratio
 	sed -i -e "s/db_Host/$db_Host/g" usermysql.json
@@ -323,7 +325,7 @@ install_ssr(){
 		[ -z "$single_Port_Enable" ] && single_Port_Enable="true"
 	read -p "$(echo -e "$yellow输入单端口号$none(默认：${cyan}8080$none)")：" single_Port_Num
 		[ -z "$single_Port_Num" ] && single_Port_Num="8080"
-	read -p "$(echo -e "$yellow设置连接密码$none(默认：${cyan}forvip$none)")：" ss_Password
+	read -p "$(echo -e "$yellow设置认证密码$none(默认：${cyan}forvip$none)")：" ss_Password
 		[ -z "$ss_Password" ] && ss_Password="forvip"
 	
 	echo -e "选择加密方式：\n$yellow 1. none\n2. aes-256-cfb\n3. chacha20\n4. aes-256-gcm"$none

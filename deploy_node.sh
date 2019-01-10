@@ -10,6 +10,9 @@ if [[ -f /usr/bin/apt ]] || [[ -f /usr/bin/yum && -f /bin/systemctl ]]; then
 		cmd="yum"
 		$cmd -y install epel-release
 	fi
+	if [[ -f /usr/bin/apt ]]; then
+		cmd="apt"
+	fi
 	if [[ -f /bin/systemctl ]]; then
 		systemd=true
 	fi

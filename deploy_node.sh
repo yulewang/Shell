@@ -30,7 +30,7 @@ service_Cmd() {
 }
 
 $cmd update -y
-$cmd install -y wget curl unzip git vim lrzsz screen ntp ntpdate cron crontab net-tools telnet
+$cmd install -y wget curl unzip git git-core vim lrzsz screen ntp ntpdate cron crontab net-tools telnet
 # 设置时区为CST
 echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 ntpdate cn.pool.ntp.org

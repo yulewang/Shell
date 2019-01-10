@@ -59,14 +59,21 @@ get_ip() {
 
 config_v2ray_caddy() {
 	read -p "绑定的域名，如 sobaigu.com ：" fake_Domain
-	read -p "转发路径『不要带/』，如 game ：" forward_Path
-	read -p "V2Ray端口，如 10086 ：" v2ray_Port
-	read -p "V2Ray额外ID，如 16 ：" alter_Id
-	read -p "配置同步端口，如 10087 ：" usersync_Port
+		[ -z "$fake_Domain" ] && fake_Domain=":80 :443"
+	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
+		[ -z "$forward_Path" ] && forward_Path="game"
+	read -p "$(echo -e "$yellow V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
+		[ -z "$v2ray_Port" ] && v2ray_Port="10086"
+	read -p "$(echo -e "$yellow V2Ray额外ID$none(默认：${cyan}16$none)")：" alter_Id
+		[ -z "$alter_Id" ] && alter_Id="16"
+	read -p "$(echo -e "$yellow配置同步端口$none(不可80/443，默认：${cyan}10087$none)")：" usersync_Port
+		[ -z "$usersync_Port" ] && usersync_Port="10087"
 	read -p "面板分配的节点ID，如 6 ：" node_Id
 	read -p "数据库地址，如 1.1.1.1 ：" db_Host
-	read -p "数据库名称，如 ssrpanel ：" db_Name
-	read -p "数据库用户，如 ssrpanel ：" db_User
+	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}ssrpanel$none)")：" db_Name
+		[ -z "$db_Name" ] && db_Name="ssrpanel"
+	read -p "$(echo -e "$yellow数据库用户$none(默认：${cyan}ssrpanel$none)")：" db_User
+		[ -z "$db_User" ] && db_User="ssrpanel"
 	read -p "数据库密码，如 ssrpanel ：" db_Password
 	install_caddy
 	install_v2ray
@@ -76,14 +83,20 @@ config_v2ray_caddy() {
 }
 
 config_v2ray() {
-	read -p "转发路径『不要带/』，如 game ：" forward_Path
-	read -p "V2Ray端口，如 10086 ：" v2ray_Port
-	read -p "V2Ray额外ID，如 16 ：" alter_Id
-	read -p "配置同步端口，如 10087 ：" usersync_Port
 	read -p "面板分配的节点ID，如 6 ：" node_Id
+	read -p "$(echo -e "$yellow V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
+		[ -z "$v2ray_Port" ] && v2ray_Port="10086"
+	read -p "$(echo -e "$yellow配置同步端口$none(不可80/443，默认：${cyan}10087$none)")：" usersync_Port
+		[ -z "$usersync_Port" ] && usersync_Port="10087"
+	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
+		[ -z "$forward_Path" ] && forward_Path="game"
+	read -p "$(echo -e "$yellow V2Ray额外ID$none(默认：${cyan}16$none)")：" alter_Id
+		[ -z "$alter_Id" ] && alter_Id="16"
 	read -p "数据库地址，如 1.1.1.1 ：" db_Host
-	read -p "数据库名称，如 ssrpanel ：" db_Name
-	read -p "数据库用户，如 ssrpanel ：" db_User
+	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}ssrpanel$none)")：" db_Name
+		[ -z "$db_Name" ] && db_Name="ssrpanel"
+	read -p "$(echo -e "$yellow数据库用户$none(默认：${cyan}ssrpanel$none)")：" db_User
+		[ -z "$db_User" ] && db_User="ssrpanel"
 	read -p "数据库密码，如 ssrpanel ：" db_Password
 	install_v2ray
 	firewall_set
@@ -94,8 +107,10 @@ config_v2ray() {
 
 config_caddy() {
 	read -p "绑定的域名，如 sobaigu.com ：" fake_Domain
-	read -p "转发路径『不要带/』，如 game ：" forward_Path
-	read -p "转发到V2Ray端口，如 10086 ：" v2ray_Port
+	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
+		[ -z "$forward_Path" ] && forward_Path="game"
+	read -p "$(echo -e "$yellow转发到V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
+		[ -z "$v2ray_Port" ] && v2ray_Port="10086"
 	install_caddy
 	firewall_set
 	service_Cmd status caddy
@@ -195,49 +210,75 @@ firewall_set(){
 		if [ $? -eq 0 ]; then
 			firewall-cmd --permanent --zone=public --remove-port=443/tcp
 			firewall-cmd --permanent --zone=public --remove-port=80/tcp
-			firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/tcp
-			firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/udp
 			firewall-cmd --permanent --zone=public --add-port=443/tcp
 			firewall-cmd --permanent --zone=public --add-port=80/tcp
-			firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/tcp
-			firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/udp
-			firewall-cmd --reload
+			if [[ $v2ray_Port ]]; then
+				firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/tcp
+				firewall-cmd --permanent --zone=public --remove-port=${v2ray_Port}/udp
+				firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/tcp
+				firewall-cmd --permanent --zone=public --add-port=${v2ray_Port}/udp
+				firewall-cmd --reload
+			fi
+			if [[ $single_Port_Num ]]; then
+				firewall-cmd --permanent --zone=public --remove-port=${single_Port_Num}/tcp
+				firewall-cmd --permanent --zone=public --remove-port=${single_Port_Num}/udp
+				firewall-cmd --permanent --zone=public --add-port=${single_Port_Num}/tcp
+				firewall-cmd --permanent --zone=public --add-port=${single_Port_Num}/udp
+				firewall-cmd --reload
+			fi
 		else
-			echo -e "[${yellow}Warning${plain}] firewalld looks like not running or not installed, please enable port 80, 443, ${v2ray_Port} manually if necessary."
+			echo -e "[${yellow}Warning${plain}] firewalld looks like not running or not installed, please manually set it if necessary."
 		fi
 	elif command -v iptables >/dev/null 2>&1; then
 		/etc/init.d/iptables status > /dev/null 2>&1
 		if [ $? -eq 0 ]; then
+			iptables -D INPUT -p tcp --dport 443 -j ACCEPT
+			iptables -D INPUT -p tcp --dport 80 -j ACCEPT
+			iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+			iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+			ip6tables -D INPUT -p tcp --dport 443 -j ACCEPT
+			ip6tables -D INPUT -p tcp --dport 80 -j ACCEPT
+			ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
+			ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
 			iptables -L -n | grep -i ${v2ray_Port} > /dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				iptables -D INPUT -p tcp --dport 443 -j ACCEPT
-				iptables -D INPUT -p tcp --dport 80 -j ACCEPT
 				iptables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
-				iptables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
-				iptables -A INPUT -p tcp --dport 443 -j ACCEPT
-				iptables -A INPUT -p tcp --dport 80 -j ACCEPT
 				iptables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				iptables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
 				iptables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
+				ip6tables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
 				/etc/init.d/iptables save
 				/etc/init.d/iptables restart
-				ip6tables -D INPUT -p tcp --dport 443 -j ACCEPT
-				ip6tables -D INPUT -p tcp --dport 80 -j ACCEPT
-				ip6tables -D INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
-				ip6tables -D INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
-				ip6tables -A INPUT -p tcp --dport 443 -j ACCEPT
-				ip6tables -A INPUT -p tcp --dport 80 -j ACCEPT
-				ip6tables -A INPUT -p tcp --dport ${v2ray_Port} -j ACCEPT
-				ip6tables -A INPUT -p udp --dport ${v2ray_Port} -j ACCEPT
 				/etc/init.d/ip6tables save
 				/etc/init.d/ip6tables restart
 			else
 				echo -e "[${green}Info${plain}] port 80, 443, ${v2ray_Port} has been set up."
 			fi
+			iptables -L -n | grep -i ${single_Port_Num} > /dev/null 2>&1
+			if [ $? -ne 0 ]; then
+				iptables -D INPUT -p tcp --dport ${single_Port_Num} -j ACCEPT
+				iptables -A INPUT -p tcp --dport ${single_Port_Num} -j ACCEPT
+				iptables -D INPUT -p udp --dport ${single_Port_Num} -j ACCEPT
+				iptables -A INPUT -p udp --dport ${single_Port_Num} -j ACCEPT
+				ip6tables -D INPUT -p tcp --dport ${single_Port_Num} -j ACCEPT
+				ip6tables -A INPUT -p tcp --dport ${single_Port_Num} -j ACCEPT
+				ip6tables -D INPUT -p udp --dport ${single_Port_Num} -j ACCEPT
+				ip6tables -A INPUT -p udp --dport ${single_Port_Num} -j ACCEPT
+				/etc/init.d/iptables save
+				/etc/init.d/iptables restart
+				/etc/init.d/ip6tables save
+				/etc/init.d/ip6tables restart
+			else
+				echo -e "[${green}Info${plain}] port 80, 443, ${single_Port_Num} has been set up."
+			fi
 		else
 			echo -e "[${yellow}Warning${plain}] iptables looks like shutdown or not installed, please manually set it if necessary."
 		fi
 	fi
-	echo -e "[${green}Info${plain}] firewall set completed... port 80, 443, ${v2ray_Port} are enable"
+	echo -e "[${green}Info${plain}] firewall set completed..."
 }
 
 install_ssr(){
@@ -252,29 +293,118 @@ install_ssr(){
 	
 	cd /usr/
 	echo 'SSR下载中...'
-	git clone -b master https://github.com/ssrpanel/shadowsocksr.git && cd shadowsocksr && sh setup_cymysql.sh && sh initcfg.sh
+	git clone -b master https://github.com/828768/shadowsocksr.git && cd shadowsocksr && bash setup_cymysql.sh && bash initcfg.sh
 	echo 'SSR安装完成'
 	echo '开始配置节点连接信息...'
-	stty erase '^H' && read -p "数据库服务器地址:" mysqlserver
-	stty erase '^H' && read -p "数据库服务器端口:" port
-	stty erase '^H' && read -p "数据库名称:" database
-	stty erase '^H' && read -p "数据库用户名:" username
-	stty erase '^H' && read -p "数据库密码:" pwd
-	stty erase '^H' && read -p "本节点ID:" nodeid
-	stty erase '^H' && read -p "本节点流量计算比例:" ratio
-	sed -i -e "s/server_host/$mysqlserver/g" usermysql.json
-	sed -i -e "s/server_port/$port/g" usermysql.json
-	sed -i -e "s/server_db/$database/g" usermysql.json
-	sed -i -e "s/server_user/$username/g" usermysql.json
-	sed -i -e "s/server_password/$pwd/g" usermysql.json
-	sed -i -e "s/nodeid/$nodeid/g" usermysql.json
-	sed -i -e "s/noderatio/$ratio/g" usermysql.json
-	echo -e "配置完成!\n如果无法连上数据库，请检查本机防火墙或者数据库防火墙!\n请自行编辑user-config.json，配置节点加密方式、混淆、协议等"
+	read -p "数据库服务器地址:" db_Host
+	read -p "$(echo -e "$yellow数据库连接端口$none(默认：${cyan}3306$none)")：" db_Port
+		[ -z "$db_Port" ] && db_Port="3306"
+	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}ssrpanel$none)")：" db_Name
+		[ -z "$db_Name" ] && db_Name="ssrpanel"
+	read -p "$(echo -e "$yellow数据库用户名$none(默认：${cyan}ssrpanel$none)")：" db_User
+		[ -z "$db_User" ] && db_User="ssrpanel"
+	read -p "本节点ID:" node_Id
+	read -p "流量计算比例:" transfer_Ratio
+	sed -i -e "s/db_Host/$db_Host/g" usermysql.json
+	sed -i -e "s/db_Port/$db_Port/g" usermysql.json
+	sed -i -e "s/db_Name/$db_Name/g" usermysql.json
+	sed -i -e "s/db_User/$db_User/g" usermysql.json
+	sed -i -e "s/db_Password/$db_Password/g" usermysql.json
+	sed -i -e "s/node_Id/$node_Id/g" usermysql.json
+	sed -i -e "s/transfer_Ratio/$transfer_Ratio/g" usermysql.json
+	echo -e "配置完成!\n如果无法连上数据库，请检查本机防火墙或者数据库防火墙!\n下一步配置user-config.json，配置节点加密方式、混淆、协议等"
 	
+	echo -e "是否强制单端口："$yellow"true"" or "$yellow"false"$none
+	read -p "$(echo -e "(默认：${cyan}true$none)")：" single_Port_Enable
+		[ -z "$single_Port_Enable" ] && single_Port_Enable="true"
+	read -p "$(echo -e "$yellow输入单端口号$none(默认：${cyan}8080$none)")：" single_Port_Num
+		[ -z "$single_Port_Num" ] && single_Port_Num="8080"
+	read -p "$(echo -e "$yellow设置连接密码$none(默认：${cyan}forvip$none)")：" ss_Password
+		[ -z "$ss_Password" ] && ss_Password="forvip"
+	
+	echo -e "选择加密方式：$yellow 1. none\n2. aes-256-cfb\n3. chacha20\n4. aes-256-gcm"$none
+	read -p "$(echo -e "(默认：${cyan}1. none$none)")：" ss_method
+		[ -z "$ss_method" ] && ss_method="none"
+	if [[ $ss_method ]]; then
+		case $ss_method in
+			1)
+				ss_method="none"
+				;;
+			2)
+				ss_method="aes-256-cfb"
+				;;
+			3)
+				ss_method="chacha20"
+				;;
+			4)
+				ss_method="aes-256-gcm"
+				;;
+		esac
+	fi
+
+	echo -e "选择传输协议：$yellow 1. origin\n2. auth_sha1_v4\n3. auth_sha1_v4_compatible\n4. auth_chain_a\n5. auth_chain_a_compatible"$none
+	read -p "$(echo -e "(默认：${cyan}1. origin$none)")：" ss_protocol
+		[ -z "$ss_protocol" ] && ss_protocol="origin"
+	if [[ $ss_protocol ]]; then
+		case $ss_protocol in
+			1)
+				ss_protocol="origin"
+				;;
+			2)
+				ss_protocol="auth_sha1_v4"
+				;;
+			3)
+				ss_protocol="auth_sha1_v4_compatible"
+				;;
+			4)
+				ss_protocol="auth_chain_a"
+				;;
+			5)
+				ss_protocol="auth_chain_a_compatible"
+				;;
+		esac
+	fi
+
+	echo -e "选择混淆方式：$yellow 1. plain\n2. http_simple\n3. tls1.2_ticket_auth\n4. tls1.2_ticket_auth_compatible"$none
+	read -p "$(echo -e "(默认：${cyan}1. plain$none)")：" ss_obfs
+		[ -z "$ss_obfs" ] && ss_obfs="plain"
+	if [[ $ss_obfs ]]; then
+		case $ss_obfs in
+			1)
+				ss_obfs="plain"
+				;;
+			2)
+				ss_obfs="http_simple"
+				;;
+			3)
+				ss_obfs="tls1.2_ticket_auth"
+				;;
+			4)
+				ss_obfs="tls1.2_ticket_auth_compatible"
+				;;
+		esac
+	fi
+
+	read -p "$(echo -e "输入限制使用设备数：(默认：${cyan}不限制，直接回车即可$none)")：" ss_Online_Num
+		[ -z "$ss_Online_Num" ] && ss_Online_Num=""
+
+	read -p "$(echo -e "用户限速值(K)：(默认：${cyan}不限制，直接回车即可$none)")：" ss_Ban_Limit
+		[ -z "$ss_Ban_Limit" ] && ss_Ban_Limit=""
+
+	sed -i -e "s/single_Port_Enable/$single_Port_Enable/g" user-config.json
+	sed -i -e "s/single_Port_Num/$single_Port_Num/g" user-config.json
+	sed -i -e "s/ss_Password/$ss_Password/g" user-config.json
+	sed -i -e "s/ss_method/$ss_method/g" user-config.json
+	sed -i -e "s/ss_protocol/$ss_protocol/g" user-config.json
+	sed -i -e "s/ss_obfs/$ss_obfs/g" user-config.json
+	sed -i -e "s/ss_Online_Num/$ss_Online_Num/g" user-config.json
+	sed -i -e "s/ss_Ban_Limit/$ss_Ban_Limit/g" user-config.json
+
 	#启动并设置开机自动运行
 	chmod +x run.sh && ./run.sh
-	sed -i '/shadowsocksr\/run.sh$/d'  /etc/rc.d/rc.local
+	sed -i "/shadowsocksr\/run.sh$/d"  /etc/rc.d/rc.local
 	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.d/rc.local
+	firewall_set
 }
 
 open_bbr(){
@@ -289,8 +419,8 @@ echo -e "2.Install V2Ray"
 echo -e "3.Install Caddy"
 echo -e "4.Install SSR"
 echo -e "5.Open BBR"
-stty erase '^H' && read -p "请输入数字进行安装[1-4]:" num
-case "$num" in
+read -p "请输入数字进行安装[1-5]:" menu_Num
+case "$menu_Num" in
 	1)
 	config_v2ray_caddy
 	;;

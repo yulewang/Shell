@@ -296,6 +296,7 @@ install_ssr(){
 	echo 'libsodium安装完成'
 	
 	cd /usr/
+	rm -rf /usr/shadowsocksr
 	echo 'SSR下载中...'
 	git clone -b master https://github.com/828768/shadowsocksr.git && cd shadowsocksr && bash setup_cymysql.sh && bash initcfg.sh
 	echo 'SSR安装完成'
@@ -328,7 +329,7 @@ install_ssr(){
 	read -p "$(echo -e "$yellow设置认证密码$none(默认：${cyan}forvip$none)")：" ss_Password
 		[ -z "$ss_Password" ] && ss_Password="forvip"
 	
-	echo -e "选择加密方式：\n$yellow 1. none\n2. aes-256-cfb\n3. chacha20\n4. aes-256-gcm"$none
+	echo -e "选择加密方式：$yellow \n1. none\n2. aes-256-cfb\n3. chacha20\n4. aes-256-gcm"$none
 	read -p "$(echo -e "(默认：${cyan}1. none$none)")：" ss_method
 		[ -z "$ss_method" ] && ss_method="none"
 	if [[ $ss_method ]]; then
@@ -348,7 +349,7 @@ install_ssr(){
 		esac
 	fi
 
-	echo -e "选择传输协议：\n$yellow 1. origin\n2. auth_sha1_v4\n3. auth_sha1_v4_compatible\n4. auth_chain_a\n5. auth_chain_a_compatible"$none
+	echo -e "选择传输协议：$yellow \n1. origin\n2. auth_sha1_v4\n3. auth_sha1_v4_compatible\n4. auth_chain_a\n5. auth_chain_a_compatible"$none
 	read -p "$(echo -e "(默认：${cyan}1. origin$none)")：" ss_protocol
 		[ -z "$ss_protocol" ] && ss_protocol="origin"
 	if [[ $ss_protocol ]]; then
@@ -371,7 +372,7 @@ install_ssr(){
 		esac
 	fi
 
-	echo -e "选择混淆方式：\n$yellow 1. plain\n2. http_simple\n3. tls1.2_ticket_auth\n4. tls1.2_ticket_auth_compatible"$none
+	echo -e "选择混淆方式：$yellow \n1. plain\n2. http_simple\n3. tls1.2_ticket_auth\n4. tls1.2_ticket_auth_compatible"$none
 	read -p "$(echo -e "(默认：${cyan}1. plain$none)")：" ss_obfs
 		[ -z "$ss_obfs" ] && ss_obfs="plain"
 	if [[ $ss_obfs ]]; then

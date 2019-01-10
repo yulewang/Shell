@@ -81,7 +81,7 @@
     // db connection
     "mysql": {
       "host": "db_Host",
-      "port": 3306,
+      "port": db_Port,
       "user": "db_User",
       "password": "db_Password",
       "dbname": "db_Name"

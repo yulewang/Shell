@@ -74,6 +74,8 @@ config_v2ray_caddy() {
 		[ -z "$usersync_Port" ] && usersync_Port="10087"
 	read -p "面板分配的节点ID，如 6 ：" node_Id
 	read -p "数据库地址，如 1.1.1.1 ：" db_Host
+	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}3306$none)")：" db_Port
+		[ -z "$db_Port" ] && db_Port="3306"
 	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}ssrpanel$none)")：" db_Name
 		[ -z "$db_Name" ] && db_Name="ssrpanel"
 	read -p "$(echo -e "$yellow数据库用户$none(默认：${cyan}ssrpanel$none)")：" db_User
@@ -97,6 +99,8 @@ config_v2ray() {
 	read -p "$(echo -e "$yellow V2Ray额外ID$none(默认：${cyan}16$none)")：" alter_Id
 		[ -z "$alter_Id" ] && alter_Id="16"
 	read -p "数据库地址，如 1.1.1.1 ：" db_Host
+	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}3306$none)")：" db_Port
+		[ -z "$db_Port" ] && db_Port="3306"
 	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}ssrpanel$none)")：" db_Name
 		[ -z "$db_Name" ] && db_Name="ssrpanel"
 	read -p "$(echo -e "$yellow数据库用户$none(默认：${cyan}ssrpanel$none)")：" db_User

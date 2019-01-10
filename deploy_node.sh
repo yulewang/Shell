@@ -21,16 +21,6 @@ else
 	echo -e " 哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}" && exit 1
 fi
 
-$cmd update -y
-$cmd install -y wget curl unzip git vim lrzsz screen ntp ntpdate crontabs net-tools telnet
-# 设置时区为CST
-echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-ntpdate cn.pool.ntp.org
-sed -i '/^.*ntpdate*/d' /etc/crontab
-sed -i '$a\* * * * 1 ntpdate cn.pool.ntp.org >> /dev/null 2>&1' /etc/crontab
-service_Cmd restart crond
-hwclock -w
-
 service_Cmd() {
 	if [[ $systemd ]]; then
 		systemctl $1 $2
@@ -38,6 +28,16 @@ service_Cmd() {
 		service $2 $1
 	fi
 }
+
+$cmd update -y
+$cmd install -y wget curl unzip git vim lrzsz screen ntp ntpdate cron crontab net-tools telnet
+# 设置时区为CST
+echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ntpdate cn.pool.ntp.org
+hwclock -w
+sed -i '/^.*ntpdate*/d' /etc/crontab
+sed -i '$a\* * * * 1 ntpdate cn.pool.ntp.org >> /dev/null 2>&1' /etc/crontab
+service_Cmd restart crond
 
 error() {
 

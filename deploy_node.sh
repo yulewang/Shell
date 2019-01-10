@@ -396,7 +396,7 @@ install_ssr(){
 		[ -z "$ss_Online_Num" ] && ss_Online_Num=""
 
 	read -p "$(echo -e "用户限速值(K)：(默认：${cyan}不限制，直接回车即可$none)")：" ss_Ban_Limit
-		[ -z "$ss_Ban_Limit" ] && ss_Ban_Limit=""
+		[ -z "$ss_Ban_Limit" ] && ss_Ban_Limit="0"
 
 	sed -i -e "s/single_Port_Enable/$single_Port_Enable/g" user-config.json
 	sed -i -e "s/single_Port_Num/$single_Port_Num/g" user-config.json

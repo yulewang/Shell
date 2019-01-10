@@ -13,14 +13,6 @@ if [[ -f /usr/bin/apt ]] || [[ -f /usr/bin/yum && -f /bin/systemctl ]]; then
 	if [[ -f /bin/systemctl ]]; then
 		systemd=true
 	fi
-	$cmd -y install git unzip  vim lrzsz screen ntp ntpdate crontabs net-tools telnet curl
-	# 设置时区为CST
-	echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-	ntpdate cn.pool.ntp.org
-	sed -i '/^.*ntpdate*/d' /etc/crontab
-	sed -i '$a\* * * * 1 ntpdate cn.pool.ntp.org >> /dev/null 2>&1' /etc/crontab
-	service crond restart
-	hwclock -w
 
 else
 	echo -e " 哈哈……这个 ${red}辣鸡脚本${none} 不支持你的系统。 ${yellow}(-_-) ${none}" && exit 1
@@ -32,6 +24,17 @@ service_Cmd() {
 		service $2 $1
 	fi
 }
+
+$cmd update -y
+$cmd install -y wget curl unzip git vim lrzsz screen ntp ntpdate crontabs net-tools telnet
+# 设置时区为CST
+echo yes | cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+ntpdate cn.pool.ntp.org
+sed -i '/^.*ntpdate*/d' /etc/crontab
+sed -i '$a\* * * * 1 ntpdate cn.pool.ntp.org >> /dev/null 2>&1' /etc/crontab
+service_Cmd restart crond
+hwclock -w
+
 error() {
 
 	echo -e "\n$red 输入错误！$none\n"
@@ -54,17 +57,17 @@ get_ip() {
 	[[ -z $ip ]] && echo -e "\n$red 这小鸡鸡还是割了吧！$none\n" && exit
 }
 
-config_v2ray_ws() {
-	read -p "绑定的域名，如 sobaigu.com :" fake_Domain
-	read -p "转发路径『不要带/』，如 game :" forward_Path
-	read -p "V2Ray端口，如 10086 :" v2ray_Port
-	read -p "V2Ray额外ID，如 16 :" alter_Id
-	read -p "配置同步端口，如 10087 :" usersync_Port
-	read -p "面板分配的节点ID，如 6 :" node_Id
-	read -p "数据库地址，如 1.1.1.1 :" db_Host
-	read -p "数据库名称，如 ssrpanel :" db_Name
-	read -p "数据库用户，如 ssrpanel :" db_User
-	read -p "数据库密码，如 ssrpanel :" db_Password
+config_v2ray_caddy() {
+	read -p "绑定的域名，如 sobaigu.com ：" fake_Domain
+	read -p "转发路径『不要带/』，如 game ：" forward_Path
+	read -p "V2Ray端口，如 10086 ：" v2ray_Port
+	read -p "V2Ray额外ID，如 16 ：" alter_Id
+	read -p "配置同步端口，如 10087 ：" usersync_Port
+	read -p "面板分配的节点ID，如 6 ：" node_Id
+	read -p "数据库地址，如 1.1.1.1 ：" db_Host
+	read -p "数据库名称，如 ssrpanel ：" db_Name
+	read -p "数据库用户，如 ssrpanel ：" db_User
+	read -p "数据库密码，如 ssrpanel ：" db_Password
 	install_caddy
 	install_v2ray
 	firewall_set
@@ -72,29 +75,46 @@ config_v2ray_ws() {
 	service_Cmd status v2ray
 }
 
+config_v2ray() {
+	read -p "转发路径『不要带/』，如 game ：" forward_Path
+	read -p "V2Ray端口，如 10086 ：" v2ray_Port
+	read -p "V2Ray额外ID，如 16 ：" alter_Id
+	read -p "配置同步端口，如 10087 ：" usersync_Port
+	read -p "面板分配的节点ID，如 6 ：" node_Id
+	read -p "数据库地址，如 1.1.1.1 ：" db_Host
+	read -p "数据库名称，如 ssrpanel ：" db_Name
+	read -p "数据库用户，如 ssrpanel ：" db_User
+	read -p "数据库密码，如 ssrpanel ：" db_Password
+	install_v2ray
+	firewall_set
+	service_Cmd status v2ray
+	echo -e "默认日志输出级别为debug，搞定后建议修改为error"
+	echo -e "完整配置示例可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#V2Ray"
+}
+
+config_caddy() {
+	read -p "绑定的域名，如 sobaigu.com ：" fake_Domain
+	read -p "转发路径『不要带/』，如 game ：" forward_Path
+	read -p "转发到V2Ray端口，如 10086 ：" v2ray_Port
+	install_caddy
+	firewall_set
+	service_Cmd status caddy
+}
+
 install_v2ray(){
 	curl -L -s https://raw.githubusercontent.com/ColetteContreras/v2ray-ssrpanel-plugin/master/install-release.sh | bash
-	echo -e "默认日志输出级别为debug，搞定后建议修改为error"
-	if [[ $num == "1" ]]; then
-		wget --no-check-certificate -O config.json https://raw.githubusercontent.com/828768/Shell/master/resource/v2ray-config.json
-		sed -i -e "s/v2ray_Port/$v2ray_Port/g" config.json
-		sed -i -e "s/alter_Id/$alter_Id/g" config.json
-		sed -i -e "s/forward_Path/$forward_Path/g" config.json
-		sed -i -e "s/usersync_Port/$usersync_Port/g" config.json
-		sed -i -e "s/node_Id/$node_Id/g" config.json
-		sed -i -e "s/db_Host/$db_Host/g" config.json
-		sed -i -e "s/db_Name/$db_Name/g" config.json
-		sed -i -e "s/db_User/$db_User/g" config.json
-		sed -i -e "s/db_Password/$db_Password/g" config.json
-		mv -f config.json /etc/v2ray/
-	fi
+	wget --no-check-certificate -O config.json https://raw.githubusercontent.com/828768/Shell/master/resource/v2ray-config.json
+	sed -i -e "s/v2ray_Port/$v2ray_Port/g" config.json
+	sed -i -e "s/alter_Id/$alter_Id/g" config.json
+	sed -i -e "s/forward_Path/$forward_Path/g" config.json
+	sed -i -e "s/usersync_Port/$usersync_Port/g" config.json
+	sed -i -e "s/node_Id/$node_Id/g" config.json
+	sed -i -e "s/db_Host/$db_Host/g" config.json
+	sed -i -e "s/db_Name/$db_Name/g" config.json
+	sed -i -e "s/db_User/$db_User/g" config.json
+	sed -i -e "s/db_Password/$db_Password/g" config.json
+	mv -f config.json /etc/v2ray/
 	service_Cmd restart v2ray
-
-	if [[ $num == "2" ]]; then
-		service_Cmd status v2ray
-		echo -e "没帮做自动配置，手动去改 /etc/v2ray/config.json"
-		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#V2Ray"
-	fi
 }
 
 install_caddy() {
@@ -152,26 +172,19 @@ install_caddy() {
 	rm -rf $caddy_tmp
 	echo -e "Caddy安装完成！"
 
+	# 放个本地游戏网站
+	wget --no-check-certificate -O www.zip https://raw.githubusercontent.com/828768/Shell/master/resource/www.zip
+	unzip -n www.zip -d /srv/ && rm -f www.zip
 	# 修改配置
 	mkdir -p /etc/caddy/
-	if [[ $num == "1" ]]; then
-		wget --no-check-certificate -O www.zip https://raw.githubusercontent.com/828768/Shell/master/resource/www.zip
-		rm -rf /srv/www && unzip www.zip -d /srv/ && rm -f www.zip
-		wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/828768/Shell/master/resource/Caddyfile
-		local user_Name=$(((RANDOM << 22)))
-		sed -i -e "s/fake_Domain/$fake_Domain/g" Caddyfile
-		sed -i -e "s/forward_Path/$forward_Path/g" Caddyfile
-		sed -i -e "s/v2ray_Port/$v2ray_Port/g" Caddyfile
-		sed -i -e "s/user_Name/$user_Name/g" Caddyfile
-		mv -f Caddyfile /etc/caddy/
-	fi
+	wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/828768/Shell/master/resource/Caddyfile
+	local user_Name=$(((RANDOM << 22)))
+	sed -i -e "s/user_Name/$user_Name/g" Caddyfile
+	sed -i -e "s/fake_Domain/$fake_Domain/g" Caddyfile
+	sed -i -e "s/forward_Path/$forward_Path/g" Caddyfile
+	sed -i -e "s/v2ray_Port/$v2ray_Port/g" Caddyfile
+	mv -f Caddyfile /etc/caddy/
 	service_Cmd restart caddy
-
-	if [[ $num == "3" ]]; then
-		service_Cmd status caddy
-		echo -e "没帮你做自动配置，手动去改 /etc/caddy/Caddyfile"
-		echo -e "可以参考这里：http://sobaigu.com/ssrpanel-v2ray-go.html#caddy"
-	fi
 }
 
 # Firewall
@@ -279,13 +292,13 @@ echo -e "5.Open BBR"
 stty erase '^H' && read -p "请输入数字进行安装[1-4]:" num
 case "$num" in
 	1)
-	config_v2ray_ws
+	config_v2ray_caddy
 	;;
 	2)
-	install_v2ray
+	config_v2ray
 	;;
 	3)
-	install_caddy
+	config_caddy
 	;;
 	4)
 	install_ssr
@@ -294,6 +307,6 @@ case "$num" in
 	open_bbr
 	;;
 	*)
-	echo "请输入正确数字[1-4]:"
+	echo "请输入正确数字[1-5]:"
 	;;
 esac

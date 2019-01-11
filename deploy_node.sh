@@ -133,6 +133,7 @@ install_v2ray(){
 	sed -i -e "s/usersync_Port/$usersync_Port/g" config.json
 	sed -i -e "s/node_Id/$node_Id/g" config.json
 	sed -i -e "s/db_Host/$db_Host/g" config.json
+	sed -i -e "s/db_Port/$db_Port/g" config.json
 	sed -i -e "s/db_Name/$db_Name/g" config.json
 	sed -i -e "s/db_User/$db_User/g" config.json
 	sed -i -e "s/db_Password/$db_Password/g" config.json

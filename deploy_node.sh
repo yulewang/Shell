@@ -62,7 +62,7 @@ get_ip() {
 }
 
 config_v2ray_caddy() {
-	read -p "绑定的域名，如 sobaigu.com ：" fake_Domain
+	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
 		[ -z "$fake_Domain" ] && fake_Domain=":80 :443"
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
@@ -114,7 +114,7 @@ config_v2ray() {
 }
 
 config_caddy() {
-	read -p "绑定的域名，如 sobaigu.com ：" fake_Domain
+	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow转发到V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port

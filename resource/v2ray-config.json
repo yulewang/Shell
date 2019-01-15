@@ -27,7 +27,7 @@
       "protocol": "vmess",
       "settings": {
         "clients": [],
-        "disableInsecureEncryption": true,
+        "disableInsecureEncryption": false,
         "default": {
           "level": 0,
           "alterId": alter_Id

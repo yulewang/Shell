@@ -63,7 +63,9 @@ get_ip() {
 
 config_v2ray_caddy() {
 	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
-		[ -z "$fake_Domain" ] && fake_Domain=":80 :443"
+	read -p "伪装端口，如 443 ：" fake_port
+	read -p "Full Chain 位置，如 /etc/ssl/caddy/fullchain.cer ：" full_chain
+	read -p "Key certificate 位置，如 /etc/ssl/caddy/domain.com.key ：" key_chain
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
@@ -115,6 +117,9 @@ config_v2ray() {
 
 config_caddy() {
 	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
+	read -p "伪装端口，如 443 ：" fake_port
+	read -p "Full Chain 位置，如 /etc/ssl/caddy/fullchain.cer ：" full_chain
+	read -p "Key certificate 位置，如 /etc/ssl/caddy/domain.com.key ：" key_chain
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow转发到V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
@@ -126,7 +131,7 @@ config_caddy() {
 
 install_v2ray(){
 	curl -L -s https://raw.githubusercontent.com/ColetteContreras/v2ray-ssrpanel-plugin/master/install-release.sh | bash
-	wget --no-check-certificate -O config.json https://raw.githubusercontent.com/828768/Shell/master/resource/v2ray-config.json
+	wget --no-check-certificate -O config.json https://raw.githubusercontent.com/yulewang/Shell/master/resource/v2ray-config.json
 	sed -i -e "s/v2ray_Port/$v2ray_Port/g" config.json
 	sed -i -e "s/alter_Id/$alter_Id/g" config.json
 	sed -i -e "s/forward_Path/$forward_Path/g" config.json
@@ -197,14 +202,17 @@ install_caddy() {
 	echo -e "Caddy安装完成！"
 
 	# 放个本地游戏网站
-	wget --no-check-certificate -O www.zip https://raw.githubusercontent.com/828768/Shell/master/resource/www.zip
+	wget --no-check-certificate -O www.zip https://raw.githubusercontent.com/yulewang/Shell/master/resource/www.zip
 	unzip -n www.zip -d /srv/ && rm -f www.zip
 	# 修改配置
 	mkdir -p /etc/caddy/
-	wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/828768/Shell/master/resource/Caddyfile
-	local user_Name=$(((RANDOM << 22)))
-	sed -i -e "s/user_Name/$user_Name/g" Caddyfile
+	wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/yulewang/Shell/master/resource/Caddyfile
+	# local user_Name=$(((RANDOM << 22)))
+	# sed -i -e "s/user_Name/$user_Name/g" Caddyfile
+	sed -i -e "s/full_chain/$full_chain/g" Caddyfile
+	sed -i -e "s/key_chain/$key_chain/g" Caddyfile
 	sed -i -e "s/fake_Domain/$fake_Domain/g" Caddyfile
+	sed -i -e "s/fake_port/$fake_port/g" Caddyfile
 	sed -i -e "s/forward_Path/$forward_Path/g" Caddyfile
 	sed -i -e "s/v2ray_Port/$v2ray_Port/g" Caddyfile
 	mv -f Caddyfile /etc/caddy/
@@ -305,7 +313,7 @@ install_ssr(){
 	cd /usr/
 	rm -rf /usr/shadowsocksr
 	echo 'SSR下载中...'
-	git clone -b master https://github.com/828768/shadowsocksr.git && cd shadowsocksr && bash setup_cymysql.sh && bash initcfg.sh
+	git clone -b master https://github.com/yulewang/shadowsocksr.git && cd shadowsocksr && bash setup_cymysql.sh && bash initcfg.sh
 	echo 'SSR安装完成'
 	echo '开始配置节点连接信息...'
 	read -p "数据库服务器地址:" db_Host
@@ -428,11 +436,19 @@ open_bbr(){
 	./bbr.sh
 }
 
+config_ssl(){
+	cd
+	wget --no-check-certificate https://raw.githubusercontent.com/yulewang/acme/master/acme_2.0.sh
+	chmod +x acme_2.0.sh
+	./acme_2.0.sh
+}
+
 echo -e "1.Install V2Ray+Caddy"
 echo -e "2.Install V2Ray"
 echo -e "3.Install Caddy"
 echo -e "4.Install SSR"
 echo -e "5.Open BBR"
+echo -e "6.Config ssl with Let's Encrypt"
 read -p "请输入数字进行安装[1-5]:" menu_Num
 case "$menu_Num" in
 	1)
@@ -449,6 +465,9 @@ case "$menu_Num" in
 	;;
 	5)
 	open_bbr
+	;;
+	6)
+	config_ssl
 	;;
 	*)
 	echo "请输入正确数字[1-5]:"

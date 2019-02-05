@@ -64,8 +64,6 @@ get_ip() {
 config_v2ray_caddy() {
 	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
 	read -p "伪装端口，如 443 ：" fake_port
-	read -p "Full Chain 位置，如 /etc/ssl/caddy/fullchain.cer ：" full_chain
-	read -p "Key certificate 位置，如 /etc/ssl/caddy/domain.com.key ：" key_chain
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
@@ -118,8 +116,6 @@ config_v2ray() {
 config_caddy() {
 	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
 	read -p "伪装端口，如 443 ：" fake_port
-	read -p "Full Chain 位置，如 /etc/ssl/caddy/fullchain.cer ：" full_chain
-	read -p "Key certificate 位置，如 /etc/ssl/caddy/domain.com.key ：" key_chain
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow转发到V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
@@ -198,6 +194,12 @@ install_caddy() {
 		useradd -M -s /usr/sbin/nologin www-data
 	fi
 	chown -R www-data.www-data /etc/ssl/caddy
+
+	if [[ -d /home/${fake_Domain}_rsa ]]; then
+		cp /home/${fake_Domain}_rsa/fullchain.cer /etc/ssl/caddy/fullchain.cer
+		cp /home/${fake_Domain}_rsa/${fake_Domain}.key /etc/ssl/caddy/${fake_Domain}.key
+	fi
+
 	rm -rf $caddy_tmp
 	echo -e "Caddy安装完成！"
 
@@ -209,8 +211,10 @@ install_caddy() {
 	wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/yulewang/Shell/master/resource/Caddyfile
 	# local user_Name=$(((RANDOM << 22)))
 	# sed -i -e "s/user_Name/$user_Name/g" Caddyfile
-	sed -i -e "s/full_chain/$full_chain/g" Caddyfile
-	sed -i -e "s/key_chain/$key_chain/g" Caddyfile
+	local full_Chain=$(/etc/ssl/caddy/fullchain.cer)
+	local key_Chain=$(/etc/ssl/caddy/${fake_Domain}.key)
+	sed -i -e "s/full_chain/$full_Chain/g" Caddyfile
+	sed -i -e "s/key_chain/$key_Chain/g" Caddyfile
 	sed -i -e "s/fake_Domain/$fake_Domain/g" Caddyfile
 	sed -i -e "s/fake_port/$fake_port/g" Caddyfile
 	sed -i -e "s/forward_Path/$forward_Path/g" Caddyfile

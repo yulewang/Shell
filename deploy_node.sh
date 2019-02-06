@@ -72,8 +72,8 @@ config_v2ray_caddy() {
 		[ -z "$v2ray_Port" ] && v2ray_Port="10086"
 	read -p "$(echo -e "$yellow V2Ray额外ID$none(默认：${cyan}16$none)")：" alter_Id
 		[ -z "$alter_Id" ] && alter_Id="16"
-	read -p "$(echo -e "$yellow配置同步端口$none(不可80/443，默认：${cyan}10087$none)")：" usersync_Port
-		[ -z "$usersync_Port" ] && usersync_Port="10087"
+	read -p "$(echo -e "$yellow配置同步端口$none(不可80/443，默认：${cyan}10085$none)")：" usersync_Port
+		[ -z "$usersync_Port" ] && usersync_Port="10085"
 	read -p "面板分配的节点ID，如 6 ：" node_Id
 	read -p "数据库地址，如 1.1.1.1 ：" db_Host
 	read -p "$(echo -e "$yellow数据库名称$none(默认：${cyan}3306$none)")：" db_Port
@@ -94,8 +94,8 @@ config_v2ray() {
 	read -p "面板分配的节点ID，如 6 ：" node_Id
 	read -p "$(echo -e "$yellow V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
 		[ -z "$v2ray_Port" ] && v2ray_Port="10086"
-	read -p "$(echo -e "$yellow配置同步端口$none(不可80/443，默认：${cyan}10087$none)")：" usersync_Port
-		[ -z "$usersync_Port" ] && usersync_Port="10087"
+	read -p "$(echo -e "$yellow配置同步端口$none(不可80/443，默认：${cyan}10085$none)")：" usersync_Port
+		[ -z "$usersync_Port" ] && usersync_Port="10085"
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow V2Ray额外ID$none(默认：${cyan}16$none)")：" alter_Id
@@ -460,8 +460,8 @@ echo -e "2.Install V2Ray"
 echo -e "3.Install Caddy"
 echo -e "4.Install SSR"
 echo -e "5.Open BBR"
-echo -e "6.Config ssl with Let's Encrypt"
-read -p "请输入数字进行安装[1-5]:" menu_Num
+echo -e "6.手动配置ssl with Let's Encrypt"
+read -p "请输入数字进行安装[1-6]:" menu_Num
 case "$menu_Num" in
 	1)
 	config_v2ray_caddy

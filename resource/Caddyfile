@@ -1,6 +1,8 @@
 fake_Domain:fake_port {
   root /srv/www
-  tls full_chain key_chain
+  tls {
+    dns cloudflare
+  }
   gzip
   timeouts none
   proxy /forward_Path 127.0.0.1:v2ray_Port {

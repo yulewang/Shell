@@ -64,6 +64,8 @@ get_ip() {
 config_v2ray_caddy() {
 	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
 	read -p "伪装端口，如 443 ：" fake_port
+	read -p "Cloudflare email: " CUSTOM_CLOUDFLARE_EMAIL
+	read -p "Cloudflare api key: " CUSTOM_CLOUDFLARE_API_KEY
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
@@ -116,6 +118,8 @@ config_v2ray() {
 config_caddy() {
 	read -p "伪装域名，如 sobaigu.com ：" fake_Domain
 	read -p "伪装端口，如 443 ：" fake_port
+	read -p "Cloudflare email: " CUSTOM_CLOUDFLARE_EMAIL
+	read -p "Cloudflare api key: " CUSTOM_CLOUDFLARE_API_KEY
 	read -p "$(echo -e "$yellow转发路径$none(不要带/，默认：${cyan}game$none)")：" forward_Path
 		[ -z "$forward_Path" ] && forward_Path="game"
 	read -p "$(echo -e "$yellow转发到V2Ray端口$none(不可80/443，默认：${cyan}10086$none)")：" v2ray_Port
@@ -154,9 +158,9 @@ install_caddy() {
 	local caddy_tmp="/tmp/install_caddy/"
 	local caddy_tmp_file="/tmp/install_caddy/caddy.tar.gz"
 	if [[ $sys_bit == "i386" || $sys_bit == "i686" ]]; then
-		local caddy_download_link="https://caddyserver.com/download/linux/386?license=personal"
+		local caddy_download_link="https://caddyserver.com/download/linux/386?license=personal&plugins=tls.dns.cloudflare"
 	elif [[ $sys_bit == "x86_64" ]]; then
-		local caddy_download_link="https://caddyserver.com/download/linux/amd64?license=personal"
+		local caddy_download_link="https://caddyserver.com/download/linux/amd64?license=personal&plugins=tls.dns.cloudflare"
 	else
 		echo -e "$red 自动安装 Caddy 失败！不支持你的系统。$none" && exit 1
 	fi
@@ -176,8 +180,12 @@ install_caddy() {
 
 	setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/caddy
 
+	wget --no-check-certificate -O caddy.service https://raw.githubusercontent.com/yulewang/Shell/master/resource/caddy.service
 	if [[ $systemd ]]; then
-		cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
+		sed -i -e "s/CUSTOM_CLOUDFLARE_EMAIL/$CUSTOM_CLOUDFLARE_EMAIL/g" caddy.service
+		sed -i -e "s/CUSTOM_CLOUDFLARE_API_KEY/$CUSTOM_CLOUDFLARE_API_KEY/g" caddy.service
+		mv -f caddy.service /lib/systemd/system/caddy.service
+		# cp -f ${caddy_tmp}init/linux-systemd/caddy.service /lib/systemd/system/
 		# sed -i "s/www-data/root/g" /lib/systemd/system/caddy.service
 		sed -i "s/on-failure/always/" /lib/systemd/system/caddy.service
 		systemctl enable caddy
@@ -195,10 +203,10 @@ install_caddy() {
 	fi
 	chown -R www-data.www-data /etc/ssl/caddy
 
-	if [[ -d /home/${fake_Domain}_rsa ]]; then
-		cp /home/${fake_Domain}_rsa/fullchain.cer /etc/ssl/caddy/fullchain.cer
-		cp /home/${fake_Domain}_rsa/${fake_Domain}.key /etc/ssl/caddy/${fake_Domain}.key
-	fi
+	# if [[ -d /home/${fake_Domain}_rsa ]]; then
+	# 	cp /home/${fake_Domain}_rsa/fullchain.cer /etc/ssl/caddy/fullchain.cer
+	# 	cp /home/${fake_Domain}_rsa/${fake_Domain}.key /etc/ssl/caddy/${fake_Domain}.key
+	# fi
 
 	rm -rf $caddy_tmp
 	echo -e "Caddy安装完成！"
@@ -211,10 +219,10 @@ install_caddy() {
 	wget --no-check-certificate -O Caddyfile https://raw.githubusercontent.com/yulewang/Shell/master/resource/Caddyfile
 	# local user_Name=$(((RANDOM << 22)))
 	# sed -i -e "s/user_Name/$user_Name/g" Caddyfile
-	local full_Chain=$(/etc/ssl/caddy/fullchain.cer)
-	local key_Chain=$(/etc/ssl/caddy/${fake_Domain}.key)
-	sed -i -e "s/full_chain/$full_Chain/g" Caddyfile
-	sed -i -e "s/key_chain/$key_Chain/g" Caddyfile
+	# local full_Chain=$(/etc/ssl/caddy/fullchain.cer)
+	# local key_Chain=$(/etc/ssl/caddy/${fake_Domain}.key)
+	# sed -i -e "s/full_chain/$full_Chain/g" Caddyfile
+	# sed -i -e "s/key_chain/$key_Chain/g" Caddyfile
 	sed -i -e "s/fake_Domain/$fake_Domain/g" Caddyfile
 	sed -i -e "s/fake_port/$fake_port/g" Caddyfile
 	sed -i -e "s/forward_Path/$forward_Path/g" Caddyfile

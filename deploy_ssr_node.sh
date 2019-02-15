@@ -29,8 +29,8 @@ install_ssr(){
 	echo 'ssr配置完成'
 	chmod +x run.sh && ./run.sh
 	#开机自动运行
-	sed -i '/shadowsocksr\/run.sh$/d'  /etc/rc.d/rc.local
-	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.d/rc.local
+	sed -i '/shadowsocksr\/run.sh$/d'  /etc/rc.local
+	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.local
 	cd /usr/
 	echo 'ssr已开始运行'
 	
@@ -56,11 +56,11 @@ auto_reboot(){
 	echo '设置每天几点几分重启节点'
 	stty erase '^H' && read -p " 小时(0-23):" hour
 	stty erase '^H' && read -p " 分钟(0-59):" minute
-	chmod +x /etc/rc.d/rc.local
-	sed -i '/service crond start$/d'  /etc/rc.d/rc.local
-	echo /sbin/service crond start >> /etc/rc.d/rc.local
-	sed -i '/shadowsocksr\/run.sh$/d'  /etc/rc.d/rc.local
-	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.d/rc.local
+	chmod +x /etc/rc.local
+	sed -i '/service crond start$/d'  /etc/rc.local
+	echo /sbin/service crond start >> /etc/rc.local
+	sed -i '/shadowsocksr\/run.sh$/d'  /etc/rc.local
+	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.local
 	echo '设置开机运行SSR'
 	sed -i '/sbin\/reboot$/d'  /etc/crontab
 	echo "$minute $hour * * * root /sbin/reboot" >> /etc/crontab

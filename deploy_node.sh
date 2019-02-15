@@ -436,8 +436,8 @@ install_ssr(){
 
 	#启动并设置开机自动运行
 	chmod +x run.sh && ./run.sh
-	sed -i "/shadowsocksr\/run.sh$/d"  /etc/rc.d/rc.local
-	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.d/rc.local
+	sed -i "/shadowsocksr\/run.sh$/d"  /etc/rc.local
+	echo "/usr/shadowsocksr/run.sh" >> /etc/rc.local
 	firewall_set
 }
 
